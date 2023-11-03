@@ -6,12 +6,11 @@
 <!--![msp432](https://user-images.githubusercontent.com/106806808/215067958-aa9dbdce-7557-4647-be4b-ba4c161b3c81.png)-->
 
 
-# Rubik's cube Solver
+# Rubik's Cube Solver
 This project has been developed by Stefano Bonetto as the exam for the UniTN course of "Signal, Image and Video" course of the Artificial Intelligence Systems master.
 
-\centering
 <p align="center">
-  ![using a color picker](theory/rubik_cube.gif)
+  <img src="theory/rubik_cube.gif" alt="Rubik's Cube" />
 </p>
 
 The project is composed by two main parts, the first part is the recognition of the cube and the detection of the position and the colors of the cell to know the state of the cube. <br>
