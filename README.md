@@ -7,7 +7,7 @@
 
 
 # Rubik's cube Solver
-This project has been developed by Stefano Bonetto as the exam for the UniTN course of "Signal, Image and Video" course of the Artificial Intelligence System master.<br><br>
+This project has been developed by Stefano Bonetto as the exam for the UniTN course of "Signal, Image and Video" course of the Artificial Intelligence Systems master.<br><br>
 
 The project is composed by two main parts, the first part is the recognition of the cube and the detection of the position and the colors of the cell to know the state of the cube. <br>
 
