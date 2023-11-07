@@ -33,6 +33,6 @@ $ pip3 install -r requirements.txt
 ```
 
 ## Contact me
-Stefano Bonetto: stefano.bonetto@studenti.unitn.it <br>
+Stefano Bonetto - [stefano.bonetto@studenti.unitn.it](mailto:stefano.bonetto@studenti.unitn.it)
                  
 
