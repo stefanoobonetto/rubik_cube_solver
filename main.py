@@ -34,21 +34,39 @@ faces = [['0', '0', '0', '0', '0', '0', '0', '0', '0'] for _ in range(6)]
 #               |*D7**D8**D9*|
 #               |************|
 
+def print_cube():
+    i=0
+    print("         |_________|\n")
+    print("         | " + faces[i][0] + "  " + faces[i][1] + "  " + faces[i][2] + " |\n")
+    print("         | " + faces[i][3] + "  " + faces[i][4] + "  " + faces[i][5] + " |\n")
+    print("         | " + faces[i][6] + "  " + faces[i][7] + "  " + faces[i][8] + " |\n")
+    print("_________________________________________\n")
+    print("| " + faces[1][0] + "  " + faces[1][1] +"  " + faces[1][2] + " | " + faces[2][0] + "  " + faces[2][1] + "  " + faces[2][2] + " | " + faces[3][0] + "  " + faces[3][1] +"  " + faces[3][2] + " | " + faces[4][0] + "  " + faces[4][1] + "  " + faces[4][2] + " |\n")
+    print("| " + faces[1][3] + "  " + faces[1][4] +"  " + faces[1][5] + " | " + faces[2][3] + "  " + faces[2][4] + "  " + faces[2][5] + " | " + faces[3][3] + "  " + faces[3][4] +"  " + faces[3][5] + " | " + faces[4][3] + "  " + faces[4][4] + "  " + faces[4][5] + " |\n")
+    print("| " + faces[1][3] + "  " + faces[1][4] +"  " + faces[1][5] + " | " + faces[2][3] + "  " + faces[2][4] + "  " + faces[2][5] + " | " + faces[3][3] + "  " + faces[3][4] +"  " + faces[3][5] + " | " + faces[4][3] + "  " + faces[4][4] + "  " + faces[4][5] + " |\n")
+    print("_________________________________________\n")
+    i=5
+    print("         | " + faces[i][0] + "  " + faces[i][1] + "  " + faces[i][2] + " |\n")
+    print("         | " + faces[i][3] + "  " + faces[i][4] + "  " + faces[i][5] + " |\n")
+    print("         | " + faces[i][6] + "  " + faces[i][7] + "  " + faces[i][8] + " |\n")
+    print("         |_________|\n")
+
+
 
 def getcolor(h, s, v):
     if s < 65:
-        return "w"
-    if  (h >= 165 and h <= 176):
-        return "r"
-    if (h >= 0 and h < 25) or (h >= 176):
-        return "o"
+        return "W"
+    if  (h >= 165 and h <= 180):
+        return "R"
+    if (h >= 0 and h < 25):
+        return "O"
     if h >= 25 and h < 65:
-        return "y"
+        return "Y"
     if h >= 65 and h < 95:
-        return "g"
+        return "G"
     if h >= 95 and h < 145:
-        return "b"
-    return "unknown"
+        return "B"
+    return "X"
 
 def draw_centered_grid(img, rows, cols):
     width, height = img.shape[1], img.shape[0]
@@ -77,7 +95,7 @@ def draw_centered_grid(img, rows, cols):
 cap = cv2.VideoCapture(0)
 
 def show_webcam():
-    frame_with_grid = draw_centered_grid(frame.copy(), 3, 3) #grid
+    # frame_with_grid = draw_centered_grid(frame.copy(), 3, 3) #grid
 
     # 1 = upper = yellow
     # 2 = left = blue 
@@ -86,37 +104,33 @@ def show_webcam():
     # 5 = back = orange
     # 6 = down = white  
 
-    # Define the text to display
     text = ""
     if face == 1:
-        text = "Scan the face with the yellow cell at the center"
+        text = "Scan the face with the yellow cell at the center (U)"
         text_color = (0, 255, 255)
     elif face == 2:
-        text = "Scan the face with the blue cell at the center"
+        text = "Scan the face with the blue cell at the center (L)"
         text_color = (255, 0, 0)
     elif face == 3:
-        text = "Scan the face with the red cell at the center"
+        text = "Scan the face with the red cell at the center (F)"
         text_color = (0, 0, 255)
     elif face == 4:
-        text = "Scan the face with the green cell at the center"
+        text = "Scan the face with the green cell at the center (R)"
         text_color = (0, 255, 0)
     elif face == 5:
-        text = "Scan the face with the orange cell at the center"
+        text = "Scan the face with the orange cell at the center (B)"
         text_color = (0, 102, 255)
     elif face == 6:
-        text = "Scan the face with the white cell at the center"
+        text = "Scan the face with the white cell at the center (D)"
         text_color = (255, 255, 255)
 
-    # Calculate the text size
     text_size = cv2.getTextSize(text, cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, 2)[0]
 
-    # Draw the black border
-    cv2.putText(frame_with_grid, text, (17, 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), thickness=4, lineType=cv2.LINE_AA)
+    cv2.putText(frame, text, (17, 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), thickness=4, lineType=cv2.LINE_AA)
 
-    # Draw the text with the desired color
-    cv2.putText(frame_with_grid, text, (17, 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, text_color, thickness=2, lineType=cv2.LINE_AA)
+    cv2.putText(frame, text, (17, 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, text_color, thickness=2, lineType=cv2.LINE_AA)
 
-    cv2.imshow("Rubik's cube solver", frame_with_grid)
+    cv2.imshow("Rubik's cube solver", frame)
 
 
 while face < 7:
@@ -134,8 +148,8 @@ while face < 7:
         image_without_grid = frame
         
         image_path = "faces/face" + str(face) +".jpg"
-        # cv2.imwrite(image_path, image_without_grid)
-        print("Immagine senza la griglia salvata come 'rubik_cube.jpg'")
+        cv2.imwrite(image_path, image_without_grid)
+        print("Immagine salvata come '" + image_path + "'")
 
         image = cv2.imread(image_path)
         
@@ -146,7 +160,7 @@ while face < 7:
         
         # ROI immagine (cubo di rubik)
         start_x, start_y, width, height = 200, 120, 240, 240
-        roi_grid = image[start_y:start_y + width, start_x:start_x + height]
+        # roi_grid = image[start_y:start_y + width, start_x:start_x + height]
         cell_width = width // 3
         cell_height = height // 3
         roi = []
@@ -228,16 +242,7 @@ color_central_cell = {
     5 : "White",
 }
 
-print("\n")
-print("\n")
-print("\n")
-print("\n")
-print("\n")
-print("-----------------------------------------------------------------------------")
-for i in range(6):
-    print("face " + str(i+1) + " ("+ color_central_cell[i] + " central cell): " + str(faces[i]))
-    print("-----------------------------------------------------------------------------")
-
+print_cube()
 
 cap.release()
 cv2.destroyAllWindows()
