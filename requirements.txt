@@ -1,0 +1,5 @@
+opencv-python3
+numpy
+kociemba
+time
+pyautogui
