@@ -2,6 +2,7 @@
 <div>
         <img src="https://img.shields.io/badge/python-3670A0?style=flat&logo=python&logoColor=ffdd54" alt="Python"/>
 </div>
+<br>
 
 This project, developed by Stefano Bonetto, serves as a submission for the "Signal, Image and Video" course at UniTN, part of the Artificial Intelligence Systems master's program.
 
