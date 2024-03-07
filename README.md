@@ -4,7 +4,7 @@ This project, developed by Stefano Bonetto, serves as a submission for the "Sign
 The aim is to provide a straightforward solution to solving a Rubik's cube, leveraging a color detection method. This approach doesn't use any machine learning algorithms for the color detection, instead relying solely on image processing techniques to analyze the values of each processed pixel.
 
 <p align="center">
-  <img src="rubik_cube.gif" alt="Rubik's Cube" />
+  <img src="pngs/cube/rubik_cube.gif" alt="Rubik's Cube" />
 </p>
 
 This project is divided into two primary components. The first involves recognizing the cube and detecting the position and colors of each cell to determine the cube's current state.
