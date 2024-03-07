@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3.10
 
 import cv2
 import numpy as np
@@ -7,7 +7,6 @@ import time
 import pyautogui
 
 face = 1
-
 moves_counter = 0
 
 frameWidth = 640
@@ -16,17 +15,16 @@ cap = cv2.VideoCapture(2)
 cap.set(3, frameWidth)
 cap.set(4, frameHeight)
 screen_width, screen_height = pyautogui.size()
+ret, frame = cap.read()
 
-# Calcola la posizione in basso a destra
+# Set the position of the main window in the down-right corner of the screen
 window_x = screen_width - frameWidth
 window_y = screen_height - frameHeight
-
 cv2.namedWindow("Rubik's cube solver", cv2.WINDOW_NORMAL)
 cv2.resizeWindow("Rubik's cube solver", 1000, 750)  # Imposta le dimensioni della finestra a 800x600
 
 
 # description for every possible move from the solution set
-
 rubik_moves = {
     "W" : "",
     "R": "Turn right layer one time clockwise",
@@ -50,26 +48,7 @@ rubik_moves = {
     "CUBE SOLVED!!!": "CUBE SOLVED!!!"
 }
 
-def invert_dict(d):
-    return {v: k for k, v in d.items()}
-
-rubik_moves_inv = invert_dict(rubik_moves)
-
-# initial color ranges, then will be changed in function of the central cell values 
-# (we know f.e. that the central cell of the first scanned face will be yellow, so 
-# we tune the range of yellow according to that value)
-
-color_ranges = {
-        "g": ([0,0,0], [0,255,255]),
-        "b": ([0,0,0], [0,255,255]),
-        "y": ([0,0,0], [0,255,255]),
-        "w": ([0,0,229], [180,50,255]),
-        "o": ([0,0,0], [0,255,255]),
-        "r": ([0,0,0], [0,255,255]),
-}
-
 # dictionary n_face : "color_central_cell"
-
 color_central_cell = {
     0 : "y",
     1 : "b",
@@ -79,8 +58,50 @@ color_central_cell = {
     5 : "w",
 }
 
+# initial color ranges, then will be changed in function of the central cell values
+color_ranges = {
+        "g": ([0,0,0], [0,255,255]),
+        "b": ([0,0,0], [0,255,255]),
+        "y": ([0,0,0], [0,255,255]),
+        "w": ([0,0,229], [180,50,255]),
+        "o": ([0,0,0], [0,255,255]),
+        "r": ([0,0,0], [0,255,255]),
+}
+
+# for each move, the corrispondent arrow that has to be shown in the webcam feed
+arrows = {
+    "W" : "",
+    "R": "pngs/arrows/up_arrow.png",
+    "R'": "pngs/arrows/down_arrow.png",
+    "R2": "pngs/arrows/down_arrow_x2.png",
+    "L": "pngs/arrows/down_arrow.png",
+    "L'": "pngs/arrows/up_arrow.png",
+    "L2": "pngs/arrows/down_arrow_x2.png",
+    "U": "pngs/arrows/left_arrow.png",
+    "U'": "pngs/arrows/right_arrow.png",
+    "U2": "pngs/arrows/left_arrow_x2.png",
+    "D": "pngs/arrows/right_arrow.png",
+    "D'": "pngs/arrows/left_arrow.png",
+    "D2": "pngs/arrows/left_arrow_x2.png",
+    "F": "pngs/arrows/clockwise_arrow_front.png",
+    "F'": "pngs/arrows/counterclockwise_arrow_front.png",
+    "F2": "pngs/arrows/clockwise_arrow_front_x2.png",
+    "B": "pngs/arrows/counterclockwise_arrow_back.png",
+    "B'": "pngs/arrows/clockwise_arrow_back.png",
+    "B2": "pngs/arrows/clockwise_arrow_back_x2.png",
+    "CUBE SOLVED!!!": "CUBE SOLVED!!!"
+}
+
+# this function inverts the dictionary d
+def invert_dict(d):
+    return {v: k for k, v in d.items()}
+
+
+# empty function for the trackbars
 def empty(a):
     pass
+
+# trackbars for the color ranges
 
 cv2.namedWindow("Parameters")
 cv2.resizeWindow("Parameters", 620, 240)
@@ -88,7 +109,10 @@ cv2.createTrackbar("Threshold1", "Parameters", 150, 67, empty)         # 67
 cv2.createTrackbar("Threshold2", "Parameters", 255, 255, empty)        # 255
 cv2.createTrackbar("Area", "Parameters", 30000, 12000, empty)          #  
 
+
+# this function takes the list faces as input and returns a string that represents the cube in kociemba's convention
 def faces_to_string(faces):
+    
     #     U
     # L   F   R   B
     #     D     
@@ -101,13 +125,14 @@ def faces_to_string(faces):
     print(cube)
     return cube
     
-
-def solve_rubik(faces):
+# this function takes the string cube as input and returns the list of moves to solve the rubik's cube
+def solve_rubik(cube):
 
     solution = kociemba.solve(cube)
 
     return solution
 
+# this function prints cube in a human-readable way
 def print_cube(faces):
     i=0
     print("         |_________|\n")
@@ -125,7 +150,7 @@ def print_cube(faces):
     print("         | " + faces[i][6] + "  " + faces[i][7] + "  " + faces[i][8] + " |\n")
     print("         |_________|\n")
 
-
+# given a square, this function returns the average hsv color of the square
 def get_avg_hsv_color(ref_square):
     hsv = cv2.cvtColor(ref_square, cv2.COLOR_BGR2HSV)
     h, s, v = cv2.split(hsv)
@@ -136,12 +161,7 @@ def get_avg_hsv_color(ref_square):
 
     return h_final, s_final, v_final
 
-cv2.namedWindow("Parameters")
-cv2.resizeWindow("Parameters", 620, 240)
-cv2.createTrackbar("Threshold1", "Parameters", 150, 67, empty)         # 67
-cv2.createTrackbar("Threshold2", "Parameters", 255, 255, empty)        # 255
-cv2.createTrackbar("Area", "Parameters", 30000, 27000, empty)          #  
-
+# given an img, this function returns the ROI (face of the cube detected) and saves the squares in the folder "squares"
 def getContours(img, original, imgContour, save=True):
     contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
@@ -150,7 +170,6 @@ def getContours(img, original, imgContour, save=True):
         minArea = cv2.getTrackbarPos("Area", "Parameters")
 
         if area > minArea:
-            # print("area > minArea")
             cv2.drawContours(imgContour, contours, -1, (255, 0, 255), 7)
             approx = cv2.approxPolyDP(cnt, 0.02 * cv2.arcLength(cnt, True), True)
             vertices = np.array(approx[:4], dtype=np.int32)
@@ -163,11 +182,7 @@ def getContours(img, original, imgContour, save=True):
                 print("Saved " + f"faces/ROI{face}.jpeg")
             return x, y, w, h
 
-def print_face(face_colors):
-    print(str(face_colors[0]) + "\t" + str(face_colors[1]) + "\t" + str(face_colors[2]) + "\n" + 
-          str(face_colors[3]) + "\t" + str(face_colors[4]) + "\t" + str(face_colors[5]) + "\n" +
-          str(face_colors[6]) + "\t" + str(face_colors[7]) + "\t" + str(face_colors[8]) + "\n")
-
+# this function shows the webcam feed with the initial instructions for the user to start scanning the cube
 def show_webcam_init():
     frame_display = frame.copy()
 
@@ -193,6 +208,8 @@ def show_webcam_init():
 
     cv2.putText(frame_display, text, (17, 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, text_color, thickness=2, lineType=cv2.LINE_AA)
 
+    # insert rubik's png miniatures in down-right corner of the screen
+
     png_img = cv2.imread('pngs/cube/cube_' + str(face_colors[face]) + '.png', cv2.IMREAD_UNCHANGED)
 
     aspect_ratio = png_img.shape[1] / png_img.shape[0]
@@ -204,60 +221,27 @@ def show_webcam_init():
     frame_height, frame_width = frame_display.shape[:2]
     png_height, png_width = png_img.shape[:2]
 
-    # Create a mask of the PNG image and inverse mask
     mask = png_img[:,:,3]
     mask_inv = cv2.bitwise_not(mask)
-
-    # Create a BGR image with the same size as the frame
     bgr_img = np.zeros((frame_height, frame_width, 3), np.uint8)
     
-    # Define the top-left corner of the region of interest (ROI)
-    roi_y = frame_height - png_height - 10  # 10 pixels from the bottom
-    roi_x = frame_width - png_width - 10    # 10 pixels from the right
-
-   # Draw the PNG image on the BGR image using the alpha channel as mask
+    roi_y = frame_height - png_height - 10  
+    roi_x = frame_width - png_width - 10    
     bgr_img[roi_y:roi_y+png_height, roi_x:roi_x+png_width] = png_img[:,:,:3]
 
-    # Take only region of the BGR image from the frame
     roi = frame_display[roi_y:roi_y+png_height, roi_x:roi_x+png_width]
     img1_bg = cv2.bitwise_and(roi, roi, mask=mask_inv)
     img2_fg = cv2.bitwise_and(bgr_img[roi_y:roi_y+png_height, roi_x:roi_x+png_width], bgr_img[roi_y:roi_y+png_height, roi_x:roi_x+png_width], mask=mask)
-
-    # Put the BGR image in the ROI and modify the main image
     dst = cv2.add(img1_bg, img2_fg)
     frame_display[roi_y:roi_y+png_height, roi_x:roi_x+png_width] = dst
 
     cv2.imshow("Rubik's cube solver", frame_display)
     cv2.moveWindow("Rubik's cube solver", window_x, window_y)
 
-
-arrows = {
-    "W" : "",
-    "R": "pngs/arrows/up_arrow.png",
-    "R'": "pngs/arrows/down_arrow.png",
-    "R2": "pngs/arrows/down_arrow_x2.png",
-    "L": "pngs/arrows/down_arrow.png",
-    "L'": "pngs/arrows/up_arrow.png",
-    "L2": "pngs/arrows/down_arrow_x2.png",
-    "U": "pngs/arrows/left_arrow.png",
-    "U'": "pngs/arrows/right_arrow.png",
-    "U2": "pngs/arrows/left_arrow_x2.png",
-    "D": "pngs/arrows/right_arrow.png",
-    "D'": "pngs/arrows/left_arrow.png",
-    "D2": "pngs/arrows/left_arrow_x2.png",
-    "F": "pngs/arrows/clockwise_arrow_front.png",
-    "F'": "pngs/arrows/counterclockwise_arrow_front.png",
-    "F2": "pngs/arrows/clockwise_arrow_front_x2.png",
-    "B": "pngs/arrows/counterclockwise_arrow_back.png",
-    "B'": "pngs/arrows/clockwise_arrow_back.png",
-    "B2": "pngs/arrows/clockwise_arrow_back_x2.png",
-    "CUBE SOLVED!!!": "CUBE SOLVED!!!"
-}
-
+# this function adds the arrow to the webcam feed
 def add_arrow(x, y, w, h, frame_display, text):
+    rubik_moves_inv = invert_dict(rubik_moves)
     arrow = cv2.imread(arrows[rubik_moves_inv[text]], cv2.IMREAD_UNCHANGED)
-    # print(rubik_moves_inv[text])
-    # print(arrows[rubik_moves_inv[text]])
     aspect_ratio = arrow.shape[1] / arrow.shape[0]
     if rubik_moves_inv[text] == "R" or rubik_moves_inv[text] == "R'" or rubik_moves_inv[text] == "R2":
         x_arrow = x + w/3*2 + w/9
@@ -297,34 +281,20 @@ def add_arrow(x, y, w, h, frame_display, text):
 
     arrow = cv2.resize(arrow, (w_arrow, h_arrow))
 
-    # Create a mask of the PNG image and inverse mask   
     mask = arrow[:,:,3]
     mask_inv = cv2.bitwise_not(mask)
-
-    # Create a BGR image with the same size as the frame
     bgr_img = np.zeros((h, w, 3), np.uint8)
-    
-    # Convert the arrow image to BGR
     arrow_bgr = cv2.cvtColor(arrow, cv2.COLOR_RGBA2BGR)
-
-    # Create a ROI (Region Of Interest) in the frame_display where the arrow will be placed
     roi = frame_display[int(y_arrow):int(y_arrow+h_arrow), int(x_arrow):int(x_arrow+w_arrow)]
-
-    # Use bitwise_and with the mask to get a ROI with the same shape as the arrow but only with the arrow
     roi_with_arrow = cv2.bitwise_and(roi, roi, mask=mask_inv)
-
-    # Use bitwise_and on the arrow with the inverse mask to get an image with the same shape as the arrow but only with the ROI
     arrow_with_roi = cv2.bitwise_and(arrow_bgr, arrow_bgr, mask=mask)
-
-    # Add the roi_with_arrow and arrow_with_roi to get an image with the same shape as the arrow but with the arrow and the ROI
     combined = cv2.add(roi_with_arrow, arrow_with_roi)
 
-    # Replace the ROI in the frame_display with the combined image
     frame_display[int(y_arrow):int(y_arrow+h_arrow), int(x_arrow):int(x_arrow+w_arrow)] = combined
 
     return frame_display
 
-    
+# this function shows the webcam feed once the scan is done (solution mode)
 def show_webcam_sol(text, move=True):
     frame_display = frame.copy()
 
@@ -362,6 +332,7 @@ def show_webcam_sol(text, move=True):
 
     cv2.imshow("Rubik's cube solver", frame_display)
 
+# this function processes the frame scanned by the webcam and saves the squares in the folder "squares"
 def process_frame(frame, face):
     img = frame.copy()
     imgBlur = cv2.GaussianBlur(img, (7, 7), 1)
@@ -392,140 +363,102 @@ def process_frame(frame, face):
 
     return face + 1
 
-while face < 7:
-    ret, frame = cap.read()
-    if not ret:
-        break
 
-    show_webcam_init()
+def main(opt):
     
-    key = cv2.waitKey(1)
+    # scan the 6 faces of the rubik's cube
+    while face < 7:
+        if not ret:
+            break
 
-    if key == ord('q'):
-        # print(face)
-        image_path = f"scan/face{face}.jpg"
-        cv2.imwrite(image_path, frame)
-        face = process_frame(frame, face)
-    elif key == 27:  # esc
-        break
+        show_webcam_init()
+        
+        key = cv2.waitKey(1)
 
-# prendo i quadratini centrali di ogni faccia come reference e adatto i range alla situazione luminosa in cui mi trovo
-reference_square = []
-reference_square_h = []
+        if key == ord('q'):
+            image_path = f"scan/face{face}.jpg"         # save the frame
+            cv2.imwrite(image_path, frame)
+            face = process_frame(frame, face)
+        elif key == 27:  # esc
+            break
 
-for i in range(6):
-    ref_square_path = f"squares/{i+1}/square_5.png"
-    ref_square = cv2.imread(ref_square_path)
-    reference_square.append(ref_square)
-    h, s, v = get_avg_hsv_color(ref_square)
-    reference_square_h.append(int(h))
-    # print(f"{ref_square_path}[{color_central_cell[i]}] --> [{int(h)}, {int(s)}, {int(v)}]\n")
-    if color_central_cell[i] != "w":
-        color_ranges[color_central_cell[i]] = ([h-10, 0, 0], [h+10, 255, 255])
-    
-# print("\n" + str(color_ranges) + "\n")
+    # take the central squares of each face (known color values) as a reference and adjust the ranges to the lighting situation I find myself in.
+    reference_square = []
+    reference_square_h = []
 
-# print("\n\n" + str(reference_square_h) + "\n\n")
+    for i in range(6):
+        ref_square_path = f"squares/{i+1}/square_5.png"
+        ref_square = cv2.imread(ref_square_path)
+        reference_square.append(ref_square)
+        h, s, v = get_avg_hsv_color(ref_square)
+        reference_square_h.append(int(h))
+        if color_central_cell[i] != "w":
+            color_ranges[color_central_cell[i]] = ([h-10, 0, 0], [h+10, 255, 255])
 
-color_central_cell = {
-    0 : "y",
-    1 : "b",
-    2 : "r",
-    3 : "g",
-    4 : "o",
-    5 : "w",
-}
-
-
-faces = []
-for i in range(6):
-    face_colors = []
-    for j in range(9):
-        path = f"squares/{i+1}/square_{j+1}.png"
-        img = cv2.imread(path)
-        h, s, v = map(int, get_avg_hsv_color(img))
-        h, s, v = min(h, 255), min(s, 255), min(v, 255)
-        if 0 <= s <= 30:
-            # print(f"{i+1}/{j+1}: [{h}, {s}, {v}] --> w")
-            face_colors.append("w")
-        else:
-            for color, (lower, upper) in color_ranges.items():
-                if lower[0] <= h <= upper[0] and lower[1] <= s <= upper[1] and lower[2] <= v <= upper[2]:
-                    # print(f"{i+1}/{j+1}: [{h}, {s}, {v}] --> {color}")
-                    face_colors.append(color)
-                    break
+    # here I take every face's square (9 for each face) and I calculate the average hsv color of each square, then I assign a color to each square
+    faces = []
+    for i in range(6):
+        face_colors = []
+        for j in range(9):
+            path = f"squares/{i+1}/square_{j+1}.png"
+            img = cv2.imread(path)
+            h, s, v = map(int, get_avg_hsv_color(img))
+            h, s, v = min(h, 255), min(s, 255), min(v, 255)
+            if 0 <= s <= 30:
+                face_colors.append("w")
             else:
-                # can't find a color, so we take the closest one
-                index = min(range(len(reference_square_h)-1), key=lambda i: abs(h - reference_square_h[i]))                                
-                # print(f"{i+1}/{j+1}: [{h}, {s}, {v}] --> {color_central_cell[index]} (w/ nearest_match)")
-                face_colors.append(color_central_cell[index])
-        if face_colors[j] == "o" or face_colors[j] == "r":
-            if ((h - reference_square_h[2]) ** 2) < ((h - reference_square_h[4]) ** 2):
-                # print(str((h - reference_square_h[2]) ** 2) + " < " + str((h - reference_square_h[4]) ** 2) + " (red)")
-                face_colors[j] = "r"
-            else:   
-                # print(str((h - reference_square_h[2]) ** 2) + " > " + str((h - reference_square_h[4]) ** 2) + " (orange)")
-                face_colors[j] = "o"
-        # if face_colors[j] == "y" or face_colors[j] == "w":
-        #     if ((h - reference_square_h[0]) ** 2) < ((h - reference_square_h[5]) ** 2):
-        #         print(str((h - reference_square_h[0]) ** 2) + " < " + str((h - reference_square_h[5]) ** 2) + " (yellow)")
-        #         face_colors[j] = "y"
-        #     else:   
-        #         print(str((h - reference_square_h[0]) ** 2) + " > " + str((h - reference_square_h[5]) ** 2) + " (white)")
-        #         face_colors[j] = "w"
-    
-    faces.append(face_colors)
+                for color, (lower, upper) in color_ranges.items():
+                    if lower[0] <= h <= upper[0] and lower[1] <= s <= upper[1] and lower[2] <= v <= upper[2]:
+                        face_colors.append(color)
+                        break
+                else:
+                    # can't find a color, so we take the closest one
+                    index = min(range(len(reference_square_h)-1), key=lambda i: abs(h - reference_square_h[i]))                                
+                    face_colors.append(color_central_cell[index])
+            # double check on the similar colors (red and orange)
+            if face_colors[j] == "o" or face_colors[j] == "r":
+                if ((h - reference_square_h[2]) ** 2) < ((h - reference_square_h[4]) ** 2):
+                    face_colors[j] = "r"
+                else:   
+                    face_colors[j] = "o"
+        faces.append(face_colors)
 
-    # esempio per debugging
-    
-    faces = [
-        ["w", "o", "r", "r", "y", "r", "r", "g", "w"],
-        ["b", "b", "w", "g", "b", "b", "y", "b", "r"],
-        ["g", "w", "b", "w", "r", "r", "y", "r", "o"],
-        ["o", "y", "y", "w", "g", "g", "w", "o", "g"],
-        ["b", "y", "r", "o", "o", "y", "y", "o", "o"],
-        ["g", "g", "g", "y", "w", "b", "b", "w", "o"]
-    ]
+    print("\n")
+    print_cube(faces)
+    cube = faces_to_string(faces)
 
-print("\n")
-print_cube(faces)
-cube = faces_to_string(faces)
+    solution = solve_rubik(cube).split()
 
-# print(len(cube))
+    solution.append("CUBE SOLVED!!!")
+    print(solution)
 
-solution = solve_rubik(cube).split()
-# print(solution)
-solution.append("CUBE SOLVED!!!")
-print(solution)
-current_text = "put the red face in front of the camera"
+    current_text = "put the red face in front of the camera"
+    arrow_added_time = None
 
-arrow_added_time = None
+    # show the webcam feed with hints (arrows) for the user to solve the rubik's cube
+    while moves_counter < len(solution)+1:
+        ret, frame = cap.read()
+        
+        if not ret:
+            break
+        
+        key = cv2.waitKey(1)
 
-while moves_counter < len(solution)+1:
-    ret, frame = cap.read()
-    
-    if not ret:
-        break
-    
-    key = cv2.waitKey(1)
+        if key == ord('q'):
+            print(solution[moves_counter])
+            current_text = rubik_moves[solution[moves_counter]]
+            moves_counter = moves_counter + 1
+            arrow_added_time = time.time()
 
-    if key == ord('q'):
-        print(solution[moves_counter])
-        current_text = rubik_moves[solution[moves_counter]]
-        moves_counter = moves_counter + 1
-        arrow_added_time = time.time()
+        if arrow_added_time is None:
+            show_webcam_sol(current_text, False)
+        elif time.time() - arrow_added_time < 3:            # show the arrow for 3 seconds
+            show_webcam_sol(current_text, True)
+        else:
+            show_webcam_sol(current_text, False)
 
-
-    # print(str(moves_counter) + " >< " + str(len(solution)) + " --  (" + str(solution[moves_counter-1]) + ")")
-    if arrow_added_time is None:
-        show_webcam_sol(current_text, False)
-    elif time.time() - arrow_added_time < 3:
-        show_webcam_sol(current_text, True)
-    else:
-        show_webcam_sol(current_text, False)
-
-    if key == 27: # esc
-        break
+        if key == 27: # esc
+            break
 
 
 
