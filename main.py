@@ -11,11 +11,10 @@ moves_counter = 0
 
 frameWidth = 640
 frameHeight = 480
-cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(0)
 cap.set(3, frameWidth)
 cap.set(4, frameHeight)
 screen_width, screen_height = pyautogui.size()
-ret, frame = cap.read()
 
 # Set the position of the main window in the down-right corner of the screen
 window_x = screen_width - frameWidth
@@ -183,7 +182,7 @@ def getContours(img, original, imgContour, save=True):
             return x, y, w, h
 
 # this function shows the webcam feed with the initial instructions for the user to start scanning the cube
-def show_webcam_init():
+def show_webcam_init(frame):
     frame_display = frame.copy()
 
     face_texts = {
@@ -295,7 +294,7 @@ def add_arrow(x, y, w, h, frame_display, text):
     return frame_display
 
 # this function shows the webcam feed once the scan is done (solution mode)
-def show_webcam_sol(text, move=True):
+def show_webcam_sol(frame, text, move=True):
     frame_display = frame.copy()
 
     text_color = (255, 255, 255)  # white 
@@ -364,104 +363,101 @@ def process_frame(frame, face):
     return face + 1
 
 
-def main(opt):
+# scan the 6 faces of the rubik's cube
+while face < 7:
+    ret, frame = cap.read()
+
+    if not ret:
+        break
+
+    show_webcam_init(frame)
     
-    # scan the 6 faces of the rubik's cube
-    while face < 7:
-        if not ret:
-            break
+    key = cv2.waitKey(1)
 
-        show_webcam_init()
-        
-        key = cv2.waitKey(1)
+    if key == ord('q'):
+        image_path = f"scan/face{face}.jpg"         # save the frame
+        cv2.imwrite(image_path, frame)
+        face = process_frame(frame, face)
+    elif key == 27:  # esc
+        break
 
-        if key == ord('q'):
-            image_path = f"scan/face{face}.jpg"         # save the frame
-            cv2.imwrite(image_path, frame)
-            face = process_frame(frame, face)
-        elif key == 27:  # esc
-            break
+# take the central squares of each face (known color values) as a reference and adjust the ranges to the lighting situation I find myself in.
+reference_square = []
+reference_square_h = []
 
-    # take the central squares of each face (known color values) as a reference and adjust the ranges to the lighting situation I find myself in.
-    reference_square = []
-    reference_square_h = []
+for i in range(6):
+    ref_square_path = f"squares/{i+1}/square_5.png"
+    ref_square = cv2.imread(ref_square_path)
+    reference_square.append(ref_square)
+    h, s, v = get_avg_hsv_color(ref_square)
+    reference_square_h.append(int(h))
+    if color_central_cell[i] != "w":
+        color_ranges[color_central_cell[i]] = ([h-10, 0, 0], [h+10, 255, 255])
 
-    for i in range(6):
-        ref_square_path = f"squares/{i+1}/square_5.png"
-        ref_square = cv2.imread(ref_square_path)
-        reference_square.append(ref_square)
-        h, s, v = get_avg_hsv_color(ref_square)
-        reference_square_h.append(int(h))
-        if color_central_cell[i] != "w":
-            color_ranges[color_central_cell[i]] = ([h-10, 0, 0], [h+10, 255, 255])
-
-    # here I take every face's square (9 for each face) and I calculate the average hsv color of each square, then I assign a color to each square
-    faces = []
-    for i in range(6):
-        face_colors = []
-        for j in range(9):
-            path = f"squares/{i+1}/square_{j+1}.png"
-            img = cv2.imread(path)
-            h, s, v = map(int, get_avg_hsv_color(img))
-            h, s, v = min(h, 255), min(s, 255), min(v, 255)
-            if 0 <= s <= 30:
-                face_colors.append("w")
-            else:
-                for color, (lower, upper) in color_ranges.items():
-                    if lower[0] <= h <= upper[0] and lower[1] <= s <= upper[1] and lower[2] <= v <= upper[2]:
-                        face_colors.append(color)
-                        break
-                else:
-                    # can't find a color, so we take the closest one
-                    index = min(range(len(reference_square_h)-1), key=lambda i: abs(h - reference_square_h[i]))                                
-                    face_colors.append(color_central_cell[index])
-            # double check on the similar colors (red and orange)
-            if face_colors[j] == "o" or face_colors[j] == "r":
-                if ((h - reference_square_h[2]) ** 2) < ((h - reference_square_h[4]) ** 2):
-                    face_colors[j] = "r"
-                else:   
-                    face_colors[j] = "o"
-        faces.append(face_colors)
-
-    print("\n")
-    print_cube(faces)
-    cube = faces_to_string(faces)
-
-    solution = solve_rubik(cube).split()
-
-    solution.append("CUBE SOLVED!!!")
-    print(solution)
-
-    current_text = "put the red face in front of the camera"
-    arrow_added_time = None
-
-    # show the webcam feed with hints (arrows) for the user to solve the rubik's cube
-    while moves_counter < len(solution)+1:
-        ret, frame = cap.read()
-        
-        if not ret:
-            break
-        
-        key = cv2.waitKey(1)
-
-        if key == ord('q'):
-            print(solution[moves_counter])
-            current_text = rubik_moves[solution[moves_counter]]
-            moves_counter = moves_counter + 1
-            arrow_added_time = time.time()
-
-        if arrow_added_time is None:
-            show_webcam_sol(current_text, False)
-        elif time.time() - arrow_added_time < 3:            # show the arrow for 3 seconds
-            show_webcam_sol(current_text, True)
+# here I take every face's square (9 for each face) and I calculate the average hsv color of each square, then I assign a color to each square
+faces = []
+for i in range(6):
+    face_colors = []
+    for j in range(9):
+        path = f"squares/{i+1}/square_{j+1}.png"
+        img = cv2.imread(path)
+        h, s, v = map(int, get_avg_hsv_color(img))
+        h, s, v = min(h, 255), min(s, 255), min(v, 255)
+        if 0 <= s <= 30:
+            face_colors.append("w")
         else:
-            show_webcam_sol(current_text, False)
+            for color, (lower, upper) in color_ranges.items():
+                if lower[0] <= h <= upper[0] and lower[1] <= s <= upper[1] and lower[2] <= v <= upper[2]:
+                    face_colors.append(color)
+                    break
+            else:
+                # can't find a color, so we take the closest one
+                index = min(range(len(reference_square_h)-1), key=lambda i: abs(h - reference_square_h[i]))                                
+                face_colors.append(color_central_cell[index])
+        # double check on the similar colors (red and orange)
+        if face_colors[j] == "o" or face_colors[j] == "r":
+            if ((h - reference_square_h[2]) ** 2) < ((h - reference_square_h[4]) ** 2):
+                face_colors[j] = "r"
+            else:   
+                face_colors[j] = "o"
+    faces.append(face_colors)
 
-        if key == 27: # esc
-            break
+print("\n")
+print_cube(faces)
+cube = faces_to_string(faces)
 
+solution = solve_rubik(cube).split()
 
+solution.append("CUBE SOLVED!!!")
+print(solution)
 
+current_text = "put the red face in front of the camera"
+arrow_added_time = None
+
+# show the webcam feed with hints (arrows) for the user to solve the rubik's cube
+while moves_counter < len(solution)+1:
+    ret, frame = cap.read()
+    
+    if not ret:
+        break
+    
+    key = cv2.waitKey(1)
+
+    if key == ord('q'):
+        print(solution[moves_counter])
+        current_text = rubik_moves[solution[moves_counter]]
+        moves_counter = moves_counter + 1
+        arrow_added_time = time.time()
+
+    if arrow_added_time is None:
+        show_webcam_sol(frame, current_text, False)
+    elif time.time() - arrow_added_time < 3:            # show the arrow for 3 seconds
+        show_webcam_sol(frame, current_text, True)
+    else:
+        show_webcam_sol(frame, current_text, False)
+
+    if key == 27: # esc
+        break
 
 cap.release()
 cv2.destroyAllWindows()
