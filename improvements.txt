@@ -1,5 +1,0 @@
-Quando catturo una faccia, controllo subito la cella centrale per vedere se è esattamente la faccia che ho chiesto di scannerizzare.
-
-es. se il messaggio nella webcam dice di catturare la faccia con la cella centrale gialla, controllo subito che faces[0][4] sia effettivamente gialla.
-
-non riconosce il bianco (controllare valori s in HSV format)
