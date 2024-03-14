@@ -39,6 +39,51 @@ The cube-solving component of the project utilizes the [kociemba](https://github
 
 This algorithm generates a sequence of moves, adhering to [this notation](https://ruwix.com/the-rubiks-cube/notation/). To make these moves more user-friendly, I've integrated corresponding arrows into the webcam feed for each move, providing intuitive guidance for the user on how to proceed.
 
+
+## Project Layout
+```
+└──faces	                # ROIs
+├──pngs	                        # stuff for GUI  
+├──rubik_venv
+├──scan                         # original images from webcam
+├──squares                      # each square of each face 
+|      ├──1
+|      |  ├──square_1.png
+|      |  ├──square_2.png
+|      |  ├──square_3.png
+|      |  ├──square_4.png
+|      |  ├──square_5.png
+|      |  ├──square_6.png
+|      |  ├──square_7.png
+|      |  ├──square_8.png
+|      |  └──square_9.png
+|      ├──2
+|      |  ├──square_1.png
+|      |  ├──---.png
+|      |  └──square_9.png
+|      ├──3
+|      |  ├──square_1.png
+|      |  ├──---.png
+|      |  └──square_9.png
+|      ├──4
+|      |  ├──square_1.png
+|      |  ├──---.png
+|      |  └──square_9.png
+|      ├──5
+|      |  ├──square_1.png
+|      |  ├──---.png
+|      |  └──square_9.png
+|      └──6
+|         ├──square_1.png
+
+|         ├──---.png
+|         └──square_9.png
+├──README.md
+├──clear.py
+├──main.py
+└──requirements.txt
+```
+
 ## Requirements
 To deploy this project is required a python environment (> 3.6). Is also suggested to build a virtual environment:
 ```
