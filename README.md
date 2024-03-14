@@ -79,7 +79,7 @@ This algorithm generates a sequence of moves, adhering to [this notation](https:
 |         ├──---.png
 |         └──square_9.png
 ├──README.md
-├──clear.py
+├──clear.py                    # this script helps me to clear all folders
 ├──main.py
 └──requirements.txt
 ```
