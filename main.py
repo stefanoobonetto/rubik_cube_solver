@@ -11,7 +11,7 @@ moves_counter = 0
 
 frameWidth = 640
 frameHeight = 480
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0)       # default camera, change index to use different webcams
 cap.set(3, frameWidth)
 cap.set(4, frameHeight)
 screen_width, screen_height = pyautogui.size()
@@ -20,7 +20,7 @@ screen_width, screen_height = pyautogui.size()
 window_x = screen_width - frameWidth
 window_y = screen_height - frameHeight
 cv2.namedWindow("Rubik's cube solver", cv2.WINDOW_NORMAL)
-cv2.resizeWindow("Rubik's cube solver", 1000, 750)  # Imposta le dimensioni della finestra a 800x600
+cv2.resizeWindow("Rubik's cube solver", 1000, 750)        # screen size
 
 
 # description for every possible move from the solution set
@@ -380,7 +380,7 @@ while face < 7:
         face = process_frame(frame, face)
     elif key == 27:  # esc
         break
-
+square_5
 # take the central squares of each face (known color values) as a reference and adjust the ranges to the lighting situation I find myself in.
 reference_square = []
 reference_square_h = []
