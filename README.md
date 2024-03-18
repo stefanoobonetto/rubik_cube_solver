@@ -50,34 +50,13 @@ This algorithm generates a sequence of moves, adhering to [this notation](https:
 |      ├──1
 |      |  ├──square_1.png
 |      |  ├──square_2.png
-|      |  ├──square_3.png
-|      |  ├──square_4.png
-|      |  ├──square_5.png
-|      |  ├──square_6.png
-|      |  ├──square_7.png
-|      |  ├──square_8.png
+|      |  ├──---.png
 |      |  └──square_9.png
 |      ├──2
-|      |  ├──square_1.png
-|      |  ├──---.png
-|      |  └──square_9.png
 |      ├──3
-|      |  ├──square_1.png
-|      |  ├──---.png
-|      |  └──square_9.png
 |      ├──4
-|      |  ├──square_1.png
-|      |  ├──---.png
-|      |  └──square_9.png
 |      ├──5
-|      |  ├──square_1.png
-|      |  ├──---.png
-|      |  └──square_9.png
 |      └──6
-|         ├──square_1.png
-
-|         ├──---.png
-|         └──square_9.png
 ├──README.md
 ├──REPORT_Rubik_Cube.pdf
 ├──clear.py                    # this script helps me to clear all folders
