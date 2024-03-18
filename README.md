@@ -79,6 +79,7 @@ This algorithm generates a sequence of moves, adhering to [this notation](https:
 |         ├──---.png
 |         └──square_9.png
 ├──README.md
+├──REPORT_Rubik_Cube.pdf
 ├──clear.py                    # this script helps me to clear all folders
 ├──main.py
 └──requirements.txt
