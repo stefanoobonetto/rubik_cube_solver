@@ -4,7 +4,7 @@
 </div>
 <br>
 
-This project, developed by Stefano Bonetto, serves as a submission for the "Signal, Image and Video" course at UniTN, part of the Artificial Intelligence Systems master's program.
+This project, developed by Stefano Bonetto, serves as a submission for the "Signal, Image and Video" course at University of Trento, part of the Artificial Intelligence Systems master's program.
 
 The aim is to provide a straightforward solution to solving a Rubik's cube, leveraging a color detection method. This approach doesn't use any machine learning algorithms for the color detection, instead relying solely on image processing techniques to analyze the values of each processed pixel.
 
