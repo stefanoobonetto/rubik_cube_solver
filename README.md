@@ -85,6 +85,12 @@ To launch the application, simply enter the following command:
 python3 main.py
 ```
 
+## Other Resources
+
+I prepare a complete report of my work, you can find it [here](./REPORT_Rubik_Cube.pdf).
+
+You can find my presentation of the project [here](https://www.canva.com/design/DAGAI3KMNSY/Ze47O42MsJIGttTjrehASQ/view?utm_content=DAGAI3KMNSY&utm_campaign=designshare&utm_medium=link&utm_source=editor)
+
 ## Contact me
 Stefano Bonetto: stefano.bonetto@studenti.unitn.it <br>
                  
